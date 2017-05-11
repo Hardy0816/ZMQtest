@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "server", "server\server.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "progress_test", "progress_test\progress_test.vcxproj", "{CFAF6430-8A57-46C3-83AA-6444119A90E0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "server_progress", "server_progress\server_progress.vcxproj", "{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -69,6 +71,18 @@ Global
 		{CFAF6430-8A57-46C3-83AA-6444119A90E0}.ReleaseStatic|Win32.ActiveCfg = Release|Win32
 		{CFAF6430-8A57-46C3-83AA-6444119A90E0}.ReleaseStatic|Win32.Build.0 = Release|Win32
 		{CFAF6430-8A57-46C3-83AA-6444119A90E0}.ReleaseStatic|x64.ActiveCfg = Release|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.Debug|Win32.Build.0 = Debug|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.Debug|x64.ActiveCfg = Debug|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.DebugStatic|Win32.ActiveCfg = Debug|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.DebugStatic|Win32.Build.0 = Debug|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.DebugStatic|x64.ActiveCfg = Debug|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.Release|Win32.ActiveCfg = Release|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.Release|Win32.Build.0 = Release|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.Release|x64.ActiveCfg = Release|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.ReleaseStatic|Win32.ActiveCfg = Release|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.ReleaseStatic|Win32.Build.0 = Release|Win32
+		{4FCF3D7B-3F1F-4BB7-9C34-822262E1869D}.ReleaseStatic|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
