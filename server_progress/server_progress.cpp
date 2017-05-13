@@ -10,16 +10,25 @@ using namespace std;
 
 int math_simple(char *str);
 
-
-DWORD WINAPI ThreadProc(LPVOID lpParameter)
+struct ThreadParam
 {
-	void * ctx = zmq_ctx_new();
+	void * ctx;
+	char host[16];
+	int port;
+	volatile bool stop;
+};
+
+
+
+DWORD WINAPI ThreadProc(void *param)
+{
+	ThreadParam * thread_param = (ThreadParam*) param;
 	// create req socket, act as server
-	void * rep_sock = zmq_socket(ctx, ZMQ_REP);
-	char ip[16] = "127.0.0.1";
-	unsigned int port = 5600;
+	void * rep_sock = zmq_socket(thread_param->ctx, ZMQ_REP);
+	//char ip[16] = Par.;
+	//unsigned int port = 5600;
 	char buf[256] = {0};
-	sprintf(buf,"tcp://%s:%u",ip,port);
+	sprintf(buf,"tcp://%s:%u",thread_param->host,thread_param->port);
 	// bind rep socket to the specified ip & port
 	int rc = zmq_bind(rep_sock, buf);
 	if (rc == -1)
@@ -28,7 +37,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		return 0;
 	}
 	int result=0;
-	while(1)
+	while(!thread_param->stop)
 	{
 	    zmq_msg_t msg1;
 	    zmq_msg_init(&msg1);
@@ -61,16 +70,40 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		zmq_msg_close(&msg2);
 	}
 	zmq_close(rep_sock);
-	zmq_ctx_term(ctx);
+	zmq_ctx_term(thread_param->ctx);
 	return 0;
 }
 
 int main(int argc, char * argv[])
 {
-	int a = 0;
-	HANDLE hThread1 = CreateThread(NULL,0,ThreadProc, &a, 0, NULL);
-	WaitForSingleObject(hThread1, INFINITE);
+	ThreadParam thread_param = {NULL, "127.0.0.1", 5600, false};
+	thread_param.ctx = zmq_ctx_new();
+	if(thread_param.ctx == NULL)
+	{
+		fprintf(stderr, "failed to create zmq context, reason: %s.\n", zmq_strerror(zmq_errno()));
+		return -1;
+	}
+	HANDLE hThread1 = CreateThread(NULL,0,ThreadProc, &thread_param, 0, NULL);
+
+	while (true)
+	{
+		fprintf(stdout, "enter q to exit.\n");
+		char cmd = getchar();
+		if (cmd == 'q' || cmd == 'Q')
+		{
+			// stop log thread
+			thread_param.stop = true;
+			break;
+		}
+	}
+	
 	CloseHandle(hThread1);
+	// the last one thing to do is terminate context
+	zmq_ctx_term(thread_param.ctx);
+	// close all file handlers
+	fcloseall();
+
+
 	return 0;
 }
 
