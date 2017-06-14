@@ -22,9 +22,9 @@ struct ThreadParam
 
 DWORD WINAPI ThreadProc(void *param)
 {
-	ThreadParam * thread_param = (ThreadParam*) param;
+	ThreadParam* thread_param = (ThreadParam*) param;
 	// create req socket, act as server
-	void * rep_sock = zmq_socket(thread_param->ctx, ZMQ_REP);
+	void* rep_sock = zmq_socket(thread_param->ctx, ZMQ_REP);
 	//char ip[16] = Par.;
 	//unsigned int port = 5600;
 	char buf[256] = {0};
@@ -34,28 +34,32 @@ DWORD WINAPI ThreadProc(void *param)
 	if (rc == -1)
 	{
 		printf("error, zmq bind failed.\n");
+		zmq_close(rep_sock);
+	    zmq_ctx_term(thread_param->ctx);
 		return 0;
 	}
 	int result=0;
+
+	zmq_msg_t msg1;
+	zmq_msg_init(&msg1);
+	char  content2[128] = "";
 	while(!thread_param->stop)
 	{
-	    zmq_msg_t msg1;
-	    zmq_msg_init(&msg1);
 		// recieve from the client
 		rc = zmq_msg_recv(&msg1, rep_sock,0);
 		if(rc == -1)
 		{
 			printf("error, zmq recv failed.\n");
-			return 0;
+			break;
 		}
-		char *content1 = (char*)zmq_msg_data(&msg1);
-		if(content1 == "q")
-			return 0;
+		char* content1 = (char*)zmq_msg_data(&msg1);
+		if(zmq_msg_size > 0 && *content1 == 'q')
+			break;
+		else continue;
 		printf("Client :%s.\n",content1);
 		zmq_msg_close(&msg1);
 		//calculate
 		result = math_simple(content1);
-		char  content2[128] = "";
 		itoa(result,content2,10);
 		zmq_msg_t msg2;
 	    zmq_msg_init_size(&msg2,sizeof(content2));
@@ -65,10 +69,11 @@ DWORD WINAPI ThreadProc(void *param)
 		if(rc == -1)
 		{
 			printf("error, zmq send failed.\n");
-			return 0;
+			break;
 		}   
 		zmq_msg_close(&msg2);
 	}
+	zmq_msg_close(&msg1);
 	zmq_close(rep_sock);
 	zmq_ctx_term(thread_param->ctx);
 	return 0;
@@ -96,14 +101,10 @@ int main(int argc, char * argv[])
 			break;
 		}
 	}
-	
+	WaitForSingleObject(hThread1,0);
 	CloseHandle(hThread1);
 	// the last one thing to do is terminate context
-	zmq_ctx_term(thread_param.ctx);
-	// close all file handlers
-	fcloseall();
-
-
+	//zmq_ctx_term(thread_param.ctx);
 	return 0;
 }
 
