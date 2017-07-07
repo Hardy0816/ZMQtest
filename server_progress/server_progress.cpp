@@ -17,7 +17,7 @@ struct ThreadParam
 	int port;
 	volatile bool stop;
 };
-
+HANDLE g_hMutex = NULL; 
 
 
 DWORD WINAPI ThreadProc(void *param)
@@ -29,6 +29,10 @@ DWORD WINAPI ThreadProc(void *param)
 	//unsigned int port = 5600;
 	char buf[256] = {0};
 	sprintf(buf,"tcp://%s:%u",thread_param->host,thread_param->port);
+	
+	//ask for g_hMutex
+	WaitForSingleObject(g_hMutex, INFINITE);
+	
 	// bind rep socket to the specified ip & port
 	int rc = zmq_bind(rep_sock, buf);
 	if (rc == -1)
@@ -76,11 +80,17 @@ DWORD WINAPI ThreadProc(void *param)
 	zmq_msg_close(&msg1);
 	zmq_close(rep_sock);
 	zmq_ctx_term(thread_param->ctx);
+
+	//release Mutex
+	ReleaseMutex(g_hMutex);
+	
 	return 0;
 }
 
 int main(int argc, char * argv[])
 {
+	//create Mutex
+	g_hMutex = CreateMutex(NULL, FALSE, NULL);
 	ThreadParam thread_param = {NULL, "127.0.0.1", 5600, false};
 	thread_param.ctx = zmq_ctx_new();
 	if(thread_param.ctx == NULL)
@@ -92,7 +102,9 @@ int main(int argc, char * argv[])
 
 	while (true)
 	{
+		//ask for Mutex		
 		fprintf(stdout, "enter q to exit.\n");
+		WaitForSingleObject(g_hMutex, INFINITE);
 		char cmd = getchar();
 		if (cmd == 'q' || cmd == 'Q')
 		{
@@ -100,8 +112,10 @@ int main(int argc, char * argv[])
 			thread_param.stop = true;
 			break;
 		}
+	// release mutex
+	ReleaseMutex(g_hMutex);
 	}
-	WaitForSingleObject(hThread1,0);
+
 	CloseHandle(hThread1);
 	// the last one thing to do is terminate context
 	//zmq_ctx_term(thread_param.ctx);
