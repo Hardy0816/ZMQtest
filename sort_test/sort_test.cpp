@@ -76,13 +76,13 @@ void sort_Insertion(int data[], int n)
 
 void sort_Bucket(int data[], int n)
 {
-	int* Bucket_base = new int[n];
+	int* Bucket_base = new int[sizeof(n)];
 	for(int i = 0;i < n;i++)
 	{
 		Bucket_base[data[i]] = 1;
 	}
 	int k = 0;
-	for(int j = 0;j < 256; j++)
+	for(int j = 0;j < sizeof(n); j++)
 		if(Bucket_base[j] == 1)
 			{
 				data[k] = j;
@@ -239,6 +239,35 @@ void sort_Heap(int data[],int n)
 		data[k] = data_m[k];
 	delete[] data_m;
 }
+void sort_Quick(int data[],int n1,int n2)
+{
+	int a = 0, b = 0;
+	b = data[n1];
+	int i = 0,j = 0 ,k = 0;//i记录当前的数值下标
+	for(i = n1,j= n1+1; j < n2; j++)//j记录后面要比较的值下标
+	{
+		if(b>data[j])
+		{
+			for(k = j;k > i;k--)
+			{
+				a = data[k];
+				data[k] = data[k-1];
+				data[k-1] = a;
+			}
+			i++;
+		}
+	}
+
+	if(i-n1>1)
+	    sort_Quick(data,n1,i);
+	if(i+1<n2)
+	    sort_Quick(data,i+1,n2);
+
+
+
+
+}
+
 
 int main()
 {
@@ -255,7 +284,8 @@ int main()
 	//sort_Bucket(a, a_length);
 	//sort_Counting(a, a_length);
 	//sort_Merge(a, a_length);
-	sort_Heap(a,a_length);
+	//sort_Heap(a,a_length);
+	sort_Quick(a,0,a_length);
 	cout << "After sort:" << endl;
 	for(int i = 0;i < a_length;i++)  
     cout << a[i] << " ";
