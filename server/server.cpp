@@ -54,8 +54,6 @@ int main(int argc, char * argv[])
 	while(true)
 	{
 		rc = zmq_msg_recv(&msg, server, 0);
-
-		
 		if(rc < 0)
 		{
 			printf("error: data received failed!\n");
@@ -85,15 +83,44 @@ int main(int argc, char * argv[])
 			{
 				printf("success received data from client ID:%d, message: %s\n",
 					header->client_id, data == NULL ? "NULL" : data);
+				if(data[0]=='q') // 客户退出 删除客户信息
+				{
+					printf("success client logout, the ID is:%d\n",header->client_id);
+					client_map.erase(client_map.find(header->client_id)); //通过关键字删除
+					continue;
+				}
+
+				if(data[0] == 'c') //收到客户查询需求,发送在线客户信息给客户
+				{
+					char client_id_content[256];
+					for ( map<int, unsigned int>::const_iterator iterc = client_map.begin();
+						iterc != client_map.end(); iterc++)
+					{
+						//if (header->client_id != iter->first) // 排除发送消息的client
+						{		
+							sprintf(client_id_content,"Online client: %d",iterc->first);
+							zmq_msg_t msgc;
+							zmq_msg_init_size(&msgc,zmq_msg_size(&msg));
+							memcpy(zmq_msg_data(&msgc), &header, sizeof(SERVER_HEADER));
+							memcpy((char*)zmq_msg_data(&msgc)+sizeof(SERVER_HEADER),client_id_content, zmq_msg_size(&msg)-sizeof(SERVER_HEADER));
+							zmq_msg_set_routing_id(&msgc,client_map.find(header->client_id)->second);
+							rc = zmq_msg_send(&msgc, server, 0);
+							if(rc == -1)
+							{
+								printf("error, zmq send failed.\n");
+								break;
+							}
+							zmq_msg_close(&msgc);
+						}
+					}
+					continue;
+
+				}
 				for (map<int, unsigned int>::const_iterator iter = client_map.begin();
 					iter != client_map.end(); iter++)
 				{
 					if (header->client_id != iter->first) // 排除发送消息的client
-					{
-						//zmq_msg_set_routing_id(&msg, iter->second);
-						//printf("the data length is:%d\n",zmq_msg_size(&msg));
-      //                  zmq_msg_send(&msg, server, 0);
-						
+					{						
 						zmq_msg_t msg1;
 						zmq_msg_init_size(&msg1,zmq_msg_size(&msg));
 						memcpy(zmq_msg_data(&msg1), &header, sizeof(SERVER_HEADER));

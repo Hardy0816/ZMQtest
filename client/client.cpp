@@ -82,9 +82,6 @@ int main(int argc, char * argv[])
 		//send message from req_socket
 		char content[256] = "";
 		cin.getline(content, sizeof(content) - 1);
-		// 需要一个退出的方法
-		if(content[0] == 'q')
-			break;
 
 		zmq_sleep(3);
 		zmq_msg_t msg;
@@ -102,6 +99,10 @@ int main(int argc, char * argv[])
 	    zmq_msg_close(&msg);
 		//printf("send massage succeed.\n");
 		zmq_sleep(3);
+		// 需要一个退出的方法,用户退出，在退出前告知服务端，删除客户信息
+		if(content[0] == 'q')
+			break;
+
 	}
 	// 关闭线程
 	g_stop = true;
